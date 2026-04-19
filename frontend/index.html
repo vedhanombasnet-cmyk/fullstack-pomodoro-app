@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Pomodoro Timer</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 350px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        #time {
+            font-size: 64px;
+            font-weight: 600;
+            margin: 20px 0;
+            color: #e74c3c;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 8px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .start-btn {
+            background: #27ae60;
+            color: white;
+        }
+        .start-btn:hover {
+            background: #219150;
+        }
+
+        .stop-btn {
+            background: #c0392b;
+            color: white;
+        }
+        .stop-btn:hover {
+            background: #a83226;
+        }
+
+        .pause-btn {
+            background: #f1c40f;
+            color: white;
+        }
+        .pause-btn:hover {
+            background: #d4ac0d;
+        }
+
+        .resume-btn {
+            background: #2980b9;
+            color: white;
+        }
+        .resume-btn:hover {
+            background: #2471a3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Pomodoro Timer</h1>
+        <div id="time">25:00</div>
+
+        <button class="start-btn" onclick="startTimer()">Start</button>
+        <button class="pause-btn" onclick="pauseTimer()">Pause</button>
+        <button class="resume-btn" onclick="resumeTimer()">Resume</button>
+        <button class="stop-btn" onclick="stopTimer()">Stop</button>
+    </div>
+
+    <script>
+        let interval = null;
+        let paused = false;
+
+        function format(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        async function startTimer() {
+            await fetch("http://127.0.0.1:5000/start");
+            paused = false;
+            if (interval) clearInterval(interval);
+            interval = setInterval(updateStatus, 1000);
+        }
+
+        async function pauseTimer() {
+            await fetch("http://127.0.0.1:5000/pause");
+            paused = true;
+            clearInterval(interval);
+        }
+
+        async function resumeTimer() {
+            await fetch("http://127.0.0.1:5000/resume");
+            paused = false;
+            if (interval) clearInterval(interval);
+            interval = setInterval(updateStatus, 1000);
+        }
+
+        async function stopTimer() {
+            await fetch("http://127.0.0.1:5000/stop");
+            paused = false;
+            clearInterval(interval);
+            document.getElementById("time").innerText = "25:00";
+        }
+
+        async function updateStatus() {
+            if (paused) return;
+
+            const res = await fetch("http://127.0.0.1:5000/status");
+            const data = await res.json();
+
+            document.getElementById("time").innerText = format(data.remaining);
+
+            if (data.remaining <= 0) {
+                clearInterval(interval);
+            }
+        }
+    </script>
+</body>
+</html>
