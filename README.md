@@ -13,6 +13,11 @@ This project demonstrates full‑stack engineering fundamentals:
 
 ---
 
+## Screenshots
+
+[UI Screenshot](screenshots/ui.png)
+
+
 ## Features
 
 ### Backend‑driven timer  
